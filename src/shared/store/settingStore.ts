@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { DEFAULT_SETTINGS } from '@/shared/config/settings.config'
+import { getPublicEnv } from '@/shared/config/runtimeEnv'
 
 interface NetworkSettings {
   defaultTimeout: number
@@ -106,7 +107,7 @@ export const useSettingStore = create<SettingStore>()(
             if (
               'tmdbApiToken' in settings &&
               !settings.tmdbApiToken &&
-              !import.meta.env.OKI_TMDB_API_TOKEN
+              !getPublicEnv('OKI_TMDB_API_TOKEN')
             ) {
               merged.tmdbEnabled = false
             }

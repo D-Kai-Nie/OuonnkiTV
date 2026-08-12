@@ -12,10 +12,9 @@ import { useSubscriptionStore } from '@/shared/store/subscriptionStore'
 import { useSubscriptionAutoRefresh } from '@/shared/hooks/useSubscriptionAutoRefresh'
 import { useScrollChromeVisibility } from '@/shared/hooks'
 import { useLocation } from 'react-router'
-import { INITIAL_CONFIG } from '@/shared/config/initialConfig'
+import { getInitialContentConfigId } from '@/shared/config/runtimeEnv'
 
 const UpdateModal = lazy(() => import('@/shared/components/UpdateModal'))
-const INITIAL_CONFIG_INITIALIZATION_VERSION = '2'
 
 export default function MainLayout() {
   const { hasNewVersion, setShowUpdateModal } = useVersionStore()
@@ -35,23 +34,14 @@ export default function MainLayout() {
 
   // 初始化逻辑 (从 MyRouter 迁移)
   useEffect(() => {
-    if (!INITIAL_CONFIG && localStorage.getItem('envSourcesInitialized') === 'true') {
-      localStorage.setItem(
-        'initialConfigInitializationVersion',
-        INITIAL_CONFIG_INITIALIZATION_VERSION,
-      )
-    }
+    const initialContentConfigId = getInitialContentConfigId()
     const needsInitialization =
-      localStorage.getItem('initialConfigInitializationVersion') !==
-      INITIAL_CONFIG_INITIALIZATION_VERSION
+      localStorage.getItem('initialContentConfigId') !== initialContentConfigId
     if (needsInitialization) {
       const initialize = async () => {
         await initializeEnvSources()
         await initializeEnvSubscriptions()
-        localStorage.setItem(
-          'initialConfigInitializationVersion',
-          INITIAL_CONFIG_INITIALIZATION_VERSION,
-        )
+        localStorage.setItem('initialContentConfigId', initialContentConfigId)
       }
       void initialize()
     }

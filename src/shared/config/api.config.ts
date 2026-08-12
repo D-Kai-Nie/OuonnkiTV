@@ -47,6 +47,7 @@ export const buildProxyRequestUrl = (targetUrl: string, proxyUrl?: string | null
 import type { VideoApi } from '@/shared/types/video'
 import { INITIAL_CONFIG, type VideoSourceConfig } from './initialConfig'
 import { DEFAULT_SETTINGS } from './settings.config'
+import { getPublicEnv } from './runtimeEnv'
 
 type VideoSourceInput = VideoSourceConfig[] | string | undefined
 
@@ -121,5 +122,5 @@ export const getInitialVideoSources = async (): Promise<VideoApi[]> => {
   if (INITIAL_CONFIG && INITIAL_CONFIG.videoSources !== undefined) {
     return loadVideoSources(INITIAL_CONFIG.videoSources)
   }
-  return loadVideoSources(import.meta.env.OKI_INITIAL_VIDEO_SOURCES)
+  return loadVideoSources(getPublicEnv('OKI_INITIAL_VIDEO_SOURCES'))
 }

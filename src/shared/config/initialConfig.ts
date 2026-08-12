@@ -1,3 +1,5 @@
+import { getPublicEnv } from './runtimeEnv'
+
 export interface SettingsConfig {
   network?: {
     defaultTimeout?: number
@@ -102,7 +104,7 @@ export const parseInitialConfig = (rawConfig: unknown): ExportedConfig | null =>
 }
 
 export const getInitialConfig = (): ExportedConfig | null => {
-  return parseInitialConfig(import.meta.env.OKI_INITIAL_CONFIG)
+  return parseInitialConfig(getPublicEnv('OKI_INITIAL_CONFIG'))
 }
 
 export const INITIAL_CONFIG = getInitialConfig()
