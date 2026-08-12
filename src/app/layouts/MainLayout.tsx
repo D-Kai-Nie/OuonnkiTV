@@ -8,16 +8,20 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { useVersionStore } from '@/shared/store/versionStore'
 import { useSettingStore } from '@/shared/store/settingStore'
 import { useApiStore } from '@/shared/store/apiStore'
+import { useSubscriptionStore } from '@/shared/store/subscriptionStore'
 import { useSubscriptionAutoRefresh } from '@/shared/hooks/useSubscriptionAutoRefresh'
 import { useScrollChromeVisibility } from '@/shared/hooks'
 import { useLocation } from 'react-router'
+import { INITIAL_CONFIG } from '@/shared/config/initialConfig'
 
 const UpdateModal = lazy(() => import('@/shared/components/UpdateModal'))
+const INITIAL_CONFIG_INITIALIZATION_VERSION = '2'
 
 export default function MainLayout() {
   const { hasNewVersion, setShowUpdateModal } = useVersionStore()
   const { system } = useSettingStore()
   const { initializeEnvSources } = useApiStore()
+  const { initializeEnvSubscriptions } = useSubscriptionStore()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const isChromeVisible = useScrollChromeVisibility({
@@ -31,12 +35,27 @@ export default function MainLayout() {
 
   // 初始化逻辑 (从 MyRouter 迁移)
   useEffect(() => {
-    const needsInitialization = localStorage.getItem('envSourcesInitialized') !== 'true'
-    if (needsInitialization) {
-      initializeEnvSources()
-      localStorage.setItem('envSourcesInitialized', 'true')
+    if (!INITIAL_CONFIG && localStorage.getItem('envSourcesInitialized') === 'true') {
+      localStorage.setItem(
+        'initialConfigInitializationVersion',
+        INITIAL_CONFIG_INITIALIZATION_VERSION,
+      )
     }
-  }, [initializeEnvSources])
+    const needsInitialization =
+      localStorage.getItem('initialConfigInitializationVersion') !==
+      INITIAL_CONFIG_INITIALIZATION_VERSION
+    if (needsInitialization) {
+      const initialize = async () => {
+        await initializeEnvSources()
+        await initializeEnvSubscriptions()
+        localStorage.setItem(
+          'initialConfigInitializationVersion',
+          INITIAL_CONFIG_INITIALIZATION_VERSION,
+        )
+      }
+      void initialize()
+    }
+  }, [initializeEnvSources, initializeEnvSubscriptions])
 
   // 版本更新检查
   useEffect(() => {

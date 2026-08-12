@@ -16,7 +16,7 @@ OuonnkiTV 支持通过环境变量预定义应用的默认配置。当用户点�
 | `OKI_TMDB_IMAGE_BASE_URL` | 否 | TMDB 图片基础地址（默认 `https://image.tmdb.org/t/p/`） |
 | `OKI_ACCESS_PASSWORD` | 否 | 访问密码（留空则公开访问） |
 | `OKI_DISABLE_ANALYTICS` | 否 | 设为 `true` 禁用 Vercel Analytics（Docker 等非 Vercel 部署建议设为 `true`） |
-| `OKI_INITIAL_CONFIG` | 否 | 完整 JSON 配置（包含所有设置和视频源） |
+| `OKI_INITIAL_CONFIG` | 否 | 完整 JSON 配置（包含设置、视频源、订阅等导出数据） |
 
 ### 默认视频源（`OKI_INITIAL_VIDEO_SOURCES`）
 
@@ -36,11 +36,19 @@ OKI_INITIAL_VIDEO_SOURCES=https://example.com/sources.json
 
 ### 完整配置导入（`OKI_INITIAL_CONFIG`）
 
-使用 `OKI_INITIAL_CONFIG` 可一次性导入完整配置（包含所有应用设置和视频源），格式与应用内「导出个人配置」生成的 JSON 一致。
+使用 `OKI_INITIAL_CONFIG` 可一次性导入完整配置（包含所有应用设置、视频源和订阅），格式与应用内「导出个人配置」生成的 JSON 一致。`videoSources` 也可直接填写返回视频源 JSON 数组的远程 URL。
 
 ```env
 OKI_INITIAL_CONFIG='{"settings":{...},"videoSources":[...],"meta":{...}}'
 ```
+
+远程视频源示例：
+
+```env
+OKI_INITIAL_CONFIG='{"settings":{...},"videoSources":"https://example.com/sources.json","subscriptions":[...]}'
+```
+
+`settings.system.tmdbApiToken`、`subscriptions`、`adFilteringEnabled` 均会在首次启动及「恢复默认配置」时恢复。环境变量仅在构建时生效；修改后需重新构建。浏览器已有本地配置时，请执行「恢复默认配置」应用新默认值。
 
 > **优先级说明**：`OKI_INITIAL_CONFIG` 中的视频源和设置优先于 `OKI_INITIAL_VIDEO_SOURCES` 及代码默认值。
 
